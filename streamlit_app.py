@@ -7,16 +7,12 @@ import pandas as pd
 st.title("전기차 충전소 지도")
 
 # CSV 로딩
-df = pd.read_csv("/mnt/data/충전소 위치.csv", encoding='utf-8')
+df = pd.read_csv("충전소 위치.csv", encoding='utf-8')
 df.columns = df.columns.str.strip()
 df["위도"] = pd.to_numeric(df["위도"], errors="coerce")
 df["경도"] = pd.to_numeric(df["경도"], errors="coerce")
 df = df.dropna(subset=["위도", "경도"])
 df[["lat", "lon"]] = df[["위도", "경도"]]
-
-# 주소를 이용해 시도, 군구 분리
-df["시도"] = df["주소"].str.extract(r"^(\S+[시도])")
-df["군구"] = df["주소"].str.extract(r"^\S+[시도]\s+(\S+[군구])")
 
 # 시도 선택
 시도_목록 = sorted(df["시도"].dropna().unique())
