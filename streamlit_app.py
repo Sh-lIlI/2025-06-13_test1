@@ -23,15 +23,28 @@ df = df.dropna(subset=["위도", "경도"])
 df[["lat", "lon"]] = df[["위도", "경도"]]
 
 # 지도 생성
-m = folium.Map(location=[35.1799817, 128.1076213], zoom_start=13)
+m = folium.Map(location=[35.1799817, 128.1076213], zoom_start=11)
 marker_cluster = MarkerCluster().add_to(m)
 
-# 마커 추가
-for idx, row in df.iterrows():
+# 상위 100개만 표시 (테스트용)
+sample_df = df.head(100)
+
+for _, row in sample_df.iterrows():
     folium.Marker(
         location=[row["lat"], row["lon"]],
-        popup=row.get("기종", "정보 없음")  # 안전하게 get 사용
+        popup=row.get("기종", "정보 없음")
     ).add_to(marker_cluster)
+
+# 마커 추가
+#for _, row in df.iterrows():
+#    folium.CircleMarker(
+#        location=[row["lat"], row["lon"]],
+#        radius=5,
+#        color='blue',
+#        fill=True,
+#        fill_opacity=0.7,
+#       popup=row.get("기종", "정보 없음")
+#    ).add_to(marker_cluster)
 
 # 지도 출력
 folium_static(m)
