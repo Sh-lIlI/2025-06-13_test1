@@ -4,47 +4,53 @@ import folium
 from folium.plugins import MarkerCluster
 import pandas as pd
 
-st.title("충전소")
+st.title("전기차 충전소 지도")
 
 # CSV 로딩
-df = pd.read_csv("충전소 위치.csv", encoding='utf-8')
-
-# 컬럼명 공백 제거
+df = pd.read_csv("/mnt/data/충전소 위치.csv", encoding='utf-8')
 df.columns = df.columns.str.strip()
-
-# 위도, 경도 숫자로 변환 (문자열 등 비정상값 NaN으로 처리)
 df["위도"] = pd.to_numeric(df["위도"], errors="coerce")
 df["경도"] = pd.to_numeric(df["경도"], errors="coerce")
-
-# NaN 제거
 df = df.dropna(subset=["위도", "경도"])
-
-# lat/lon 컬럼 만들기
 df[["lat", "lon"]] = df[["위도", "경도"]]
 
+# 주소를 이용해 시도, 군구 분리
+df["시도"] = df["주소"].str.extract(r"^(\S+[시도])")
+df["군구"] = df["주소"].str.extract(r"^\S+[시도]\s+(\S+[군구])")
+
+# 시도 선택
+시도_목록 = sorted(df["시도"].dropna().unique())
+선택_시도 = st.selectbox("시도 선택", ["선택 안 함"] + 시도_목록)
+
+군구_목록 = []
+선택_군구 = "선택 안 함"
+
+if 선택_시도 != "선택 안 함":
+    군구_목록 = sorted(df[df["시도"] == 선택_시도]["군구"].dropna().unique())
+    선택_군구 = st.selectbox("군/구 선택", ["선택 안 함"] + 군구_목록)
+
 # 지도 생성
-m = folium.Map(location=[35.1799817, 128.1076213], zoom_start=13)
+m = folium.Map(location=[35.1799817, 128.1076213], zoom_start=12)
 marker_cluster = MarkerCluster().add_to(m)
 
-# 마커 추가
-for idx, row in df.iterrows():
-    folium.Marker(
-        location=[row["lat"], row["lon"]],
-        popup=row.get("기종", "정보 없음")  # 안전하게 get 사용
-    ).add_to(marker_cluster)
+# 조건 만족 시 필터링된 마커 표시
+if 선택_시도 != "선택 안 함" and 선택_군구 != "선택 안 함":
+    filtered_df = df[(df["시도"] == 선택_시도) & (df["군구"] == 선택_군구)]
+    
+    for _, row in filtered_df.iterrows():
+        folium.Marker(
+            location=[row["lat"], row["lon"]],
+            popup=row.get("기종", "정보 없음")
+        ).add_to(marker_cluster)
 
-# 상위 100개만 표시 (테스트용)
-#sample_df = df.head(100)
+    st.success(f"{len(filtered_df)}개의 충전소가 표시되었습니다.")
 
-#for _, row in sample_df.iterrows():
-#    folium.Marker(
-#        location=[row["lat"], row["lon"]],
-#        popup=row.get("기종", "정보 없음")
-#    ).add_to(marker_cluster)
-
+else:
+    st.info("시도와 군구를 선택하면 충전소가 지도에 표시됩니다.")
 
 # 지도 출력
 folium_static(m)
 
-# 데이터프레임 확인
-st.dataframe(df, height=200)
+# 선택된 데이터 테이블 표시
+if 선택_시도 != "선택 안 함" and 선택_군구 != "선택 안 함":
+    st.dataframe(filtered_df, height=200)
