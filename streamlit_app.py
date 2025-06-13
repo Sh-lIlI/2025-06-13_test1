@@ -45,7 +45,7 @@ marker_cluster = MarkerCluster().add_to(m)
 for _, row in filtered_df.iterrows():
     folium.Marker(
         location=[row["lat"], row["lon"]],
-        popup=row.get("기종", "정보 없음")
+        popup=row.get("주소", "정보 없음")
     ).add_to(marker_cluster)
 
 # 지도 출력
