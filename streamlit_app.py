@@ -19,7 +19,7 @@ marker_cluster = MarkerCluster().add_to(m)
 for idx, row in df.iterrows():
     folium.Marker(
         location=[row["lat"], row["lon"]],
-        popup=row["기종(대)"],
+        popup=row["기종(소)"],
     ).add_to(marker_cluster)
 
 folium_static(m)
