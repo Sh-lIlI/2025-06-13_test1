@@ -27,20 +27,20 @@ m = folium.Map(location=[35.1799817, 128.1076213], zoom_start=13)
 marker_cluster = MarkerCluster().add_to(m)
 
 # 마커 추가
-#for idx, row in df.iterrows():
-#    folium.Marker(
-#        location=[row["lat"], row["lon"]],
-#        popup=row.get("기종", "정보 없음")  # 안전하게 get 사용
-#    ).add_to(marker_cluster)
-
-# 상위 100개만 표시 (테스트용)
-sample_df = df.head(100)
-
-for _, row in sample_df.iterrows():
+for idx, row in df.iterrows():
     folium.Marker(
         location=[row["lat"], row["lon"]],
-        popup=row.get("기종", "정보 없음")
+        popup=row.get("기종", "정보 없음")  # 안전하게 get 사용
     ).add_to(marker_cluster)
+
+# 상위 100개만 표시 (테스트용)
+#sample_df = df.head(100)
+
+#for _, row in sample_df.iterrows():
+#    folium.Marker(
+#        location=[row["lat"], row["lon"]],
+#        popup=row.get("기종", "정보 없음")
+#    ).add_to(marker_cluster)
 
 
 # 지도 출력
